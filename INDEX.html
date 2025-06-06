@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Contraseñas Seguras</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Favicon (Emoji) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+
+    <style>
+        /* Estilos personalizados para el control deslizante (slider) */
+        /* Tailwind no puede estilizar directamente los pseudo-elementos como el "thumb" del slider */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #334155; /* Corresponde a slate-700 en Tailwind */
+            border-radius: 9999px;
+            outline: none;
+            opacity: 0.8;
+            transition: opacity .2s;
+        }
+        input[type="range"]:hover {
+            opacity: 1;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #3b82f6; /* Corresponde a blue-500 en Tailwind */
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid #f8fafc; /* Corresponde a slate-50 en Tailwind */
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #3b82f6; /* blue-500 */
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid #f8fafc; /* slate-50 */
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 flex items-center justify-center min-h-screen p-4 antialiased">
+
+    <main class="w-full max-w-md mx-auto">
+        <header class="text-center mb-6">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-50">Generador de Contraseñas</h1>
+            <p class="text-slate-400 mt-2">Crea contraseñas fuertes y seguras en segundos.</p>
+        </header>
+
+        <!-- Sección para mostrar la contraseña generada -->
+        <section class="mb-4">
+            <div class="relative bg-slate-800 rounded-lg p-4 flex items-center justify-between shadow-lg">
+                <span id="passwordDisplay" class="text-xl md:text-2xl font-mono text-slate-300 break-all pr-12">Generando...</span>
+                <button id="copyButton" title="Copiar al portapapeles" class="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-md bg-blue-600 hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                    <svg id="copyIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M4 1.5H3a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-10a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-10a1 1 0 0 1 1-1h1v-1z"/>
+                        <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
+                    </svg>
+                    <svg id="copiedIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="hidden text-green-400" viewBox="0 0 16 16">
+                        <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022z"/>
+                    </svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- Panel de configuración de la contraseña -->
+        <section class="bg-slate-800 rounded-lg p-6 shadow-lg">
+            <div class="space-y-6">
+                <!-- Control de Longitud -->
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label for="length" class="font-medium text-slate-300">Longitud de Contraseña</label>
+                        <span id="lengthValue" class="text-blue-400 font-bold text-lg bg-slate-700 px-2 rounded">16</span>
+                    </div>
+                    <input type="range" id="length" min="8" max="32" value="16" class="w-full">
+                </div>
+
+                <!-- Opciones de Caracteres -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="flex items-center select-none">
+                        <input type="checkbox" id="includeUppercase" checked class="w-5 h-5 text-blue-500 bg-slate-700 border-slate-600 rounded focus:ring-blue-500 focus:ring-offset-slate-800">
+                        <label for="includeUppercase" class="ml-3 text-sm font-medium text-slate-300">Incluir Mayúsculas (A-Z)</label>
+                    </div>
+                    <div class="flex items-center select-none">
+                        <input type="checkbox" id="includeLowercase" checked class="w-5 h-5 text-blue-500 bg-slate-700 border-slate-600 rounded focus:ring-blue-500 focus:ring-offset-slate-800">
+                        <label for="includeLowercase" class="ml-3 text-sm font-medium text-slate-300">Incluir Minúsculas (a-z)</label>
+                    </div>
+                    <div class="flex items-center select-none">
+                        <input type="checkbox" id="includeNumbers" checked class="w-5 h-5 text-blue-500 bg-slate-700 border-slate-600 rounded focus:ring-blue-500 focus:ring-offset-slate-800">
+                        <label for="includeNumbers" class="ml-3 text-sm font-medium text-slate-300">Incluir Números (0-9)</label>
+                    </div>
+                    <div class="flex items-center select-none">
+                        <input type="checkbox" id="includeSymbols" checked class="w-5 h-5 text-blue-500 bg-slate-700 border-slate-600 rounded focus:ring-blue-500 focus:ring-offset-slate-800">
+                        <label for="includeSymbols" class="ml-3 text-sm font-medium text-slate-300">Incluir Símbolos (@*#+!)</label>
+                    </div>
+                </div>
+
+                <!-- Indicador de Fortaleza -->
+                <div class="bg-slate-900/50 rounded-md p-3 flex items-center justify-between">
+                    <span class="text-sm font-medium text-slate-400">FORTALEZA</span>
+                    <div class="flex items-center gap-2">
+                         <span id="strengthText" class="text-base font-semibold transition-colors">Media</span>
+                         <div id="strengthBar1" class="w-4 h-6 rounded-sm transition-colors"></div>
+                         <div id="strengthBar2" class="w-4 h-6 rounded-sm transition-colors"></div>
+                         <div id="strengthBar3" class="w-4 h-6 rounded-sm transition-colors"></div>
+                         <div id="strengthBar4" class="w-4 h-6 rounded-sm transition-colors"></div>
+                    </div>
+                </div>
+
+                <!-- Botón de Generar -->
+                <button id="generateButton" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-blue-500">
+                    Generar Contraseña
+                </button>
+            </div>
+        </section>
+        
+        <footer class="text-center mt-8">
+            <p class="text-sm text-slate-500">Creado con IA para máxima seguridad</p>
+        </footer>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Referencias a Elementos del DOM ---
+            const lengthSlider = document.getElementById('length');
+            const lengthValue = document.getElementById('lengthValue');
+            const passwordDisplay = document.getElementById('passwordDisplay');
+            const copyButton = document.getElementById('copyButton');
+            const copyIcon = document.getElementById('copyIcon');
+            const copiedIcon = document.getElementById('copiedIcon');
+            const generateButton = document.getElementById('generateButton');
+
+            const includeOptions = {
+                uppercase: document.getElementById('includeUppercase'),
+                lowercase: document.getElementById('includeLowercase'),
+                numbers: document.getElementById('includeNumbers'),
+                symbols: document.getElementById('includeSymbols')
+            };
+
+            const strengthText = document.getElementById('strengthText');
+            const strengthBars = [
+                document.getElementById('strengthBar1'),
+                document.getElementById('strengthBar2'),
+                document.getElementById('strengthBar3'),
+                document.getElementById('strengthBar4')
+            ];
+            
+            // --- Conjuntos de Caracteres ---
+            const charSets = {
+                uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+                lowercase: 'abcdefghijklmnopqrstuvwxyz',
+                numbers: '0123456789',
+                symbols: '!@#$%^&*()_+~`|}{[]:;?><,./-='
+            };
+
+            // --- Funciones Principales ---
+
+            /**
+             * Genera un número entero aleatorio seguro.
+             * @param {number} max - El límite superior (exclusivo).
+             * @returns {number} Un entero aleatorio seguro entre 0 y max-1.
+             */
+            const getRandomInt = (max) => {
+                const randomBuffer = new Uint32Array(1);
+                window.crypto.getRandomValues(randomBuffer);
+                let randomNumber = randomBuffer[0] / (0xFFFFFFFF + 1);
+                return Math.floor(randomNumber * max);
+            };
+
+            /**
+             * Baraja una cadena de caracteres de forma aleatoria.
+             * @param {string} string - La cadena a barajar.
+             * @returns {string} La cadena con sus caracteres en orden aleatorio.
+             */
+            const shuffleString = (string) => {
+                const array = string.split('');
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = getRandomInt(i + 1);
+                    [array[i], array[j]] = [array[j], array[i]]; // Intercambio de elementos
+                }
+                return array.join('');
+            };
+
+            /**
+             * Genera la contraseña según las opciones seleccionadas.
+             */
+            const generatePassword = () => {
+                const length = parseInt(lengthSlider.value, 10);
+                let characterPool = '';
+                let password = '';
+                const selectedSets = [];
+
+                // 1. Construir la lista de caracteres y garantizar al menos uno de cada tipo seleccionado
+                for (const key in includeOptions) {
+                    if (includeOptions[key].checked) {
+                        characterPool += charSets[key];
+                        password += charSets[key][getRandomInt(charSets[key].length)];
+                        selectedSets.push(key);
+                    }
+                }
+
+                // Si no hay opciones, mostrar un mensaje y salir.
+                if (characterPool === '') {
+                    passwordDisplay.textContent = 'Selecciona opciones';
+                    updateStrengthMeter(0); // Puntuación de 0
+                    return;
+                }
+
+                // 2. Rellenar el resto de la contraseña
+                const remainingLength = length - password.length;
+                for (let i = 0; i < remainingLength; i++) {
+                    password += characterPool[getRandomInt(characterPool.length)];
+                }
+
+                // 3. Barajar la contraseña final para que sea completamente aleatoria
+                password = shuffleString(password);
+                
+                // 4. Mostrar la contraseña y actualizar la fortaleza
+                passwordDisplay.textContent = password;
+                updateStrengthMeter(selectedSets.length, length);
+            };
+
+            /**
+             * Actualiza el medidor de fortaleza de la contraseña.
+             * @param {number} typesCount - El número de tipos de caracteres seleccionados.
+             * @param {number} length - La longitud de la contraseña.
+             */
+            const updateStrengthMeter = (typesCount, length) => {
+                let score = 0;
+
+                if (typesCount > 0) {
+                   score = typesCount;
+                   if (length >= 12) score++;
+                   if (length >= 16 && typesCount >= 3) score++;
+                }
+
+                const strengthInfo = {
+                    0: { text: "...", color: "bg-slate-700", textColor: "text-slate-500", bars: 0 },
+                    1: { text: "Muy Débil", color: "bg-red-500", textColor: "text-red-400", bars: 1 },
+                    2: { text: "Débil", color: "bg-orange-500", textColor: "text-orange-400", bars: 2 },
+                    3: { text: "Media", color: "bg-yellow-500", textColor: "text-yellow-400", bars: 3 },
+                    4: { text: "Fuerte", color: "bg-green-500", textColor: "text-green-400", bars: 4 },
+                    5: { text: "Muy Fuerte", color: "bg-blue-500", textColor: "text-blue-400", bars: 4 }, // Puntuación máxima
+                };
+                
+                const currentStrength = strengthInfo[Math.min(score, 5)];
+                
+                strengthText.textContent = currentStrength.text;
+                strengthText.className = `text-base font-semibold transition-colors ${currentStrength.textColor}`;
+                
+                strengthBars.forEach((bar, index) => {
+                    bar.className = 'w-4 h-6 rounded-sm transition-colors ';
+                    if (index < currentStrength.bars) {
+                        bar.classList.add(currentStrength.color);
+                    } else {
+                        bar.classList.add('bg-slate-700');
+                    }
+                });
+            };
+            
+            /**
+             * Copia la contraseña al portapapeles.
+             */
+            const copyToClipboard = () => {
+                const password = passwordDisplay.textContent;
+                if (!password || password === 'Selecciona opciones') return;
+                
+                // El método del portapapeles es más moderno y seguro
+                navigator.clipboard.writeText(password).then(() => {
+                    copyIcon.classList.add('hidden');
+                    copiedIcon.classList.remove('hidden');
+                    copyButton.title = "¡Copiado!";
+
+                    setTimeout(() => {
+                        copyIcon.classList.remove('hidden');
+                        copiedIcon.classList.add('hidden');
+                        copyButton.title = "Copiar al portapapeles";
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Error al copiar al portapapeles:', err);
+                    // Fallback para entornos no seguros (como http)
+                    const textArea = document.createElement("textarea");
+                    textArea.value = password;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                });
+            };
+
+            // --- Asignación de Event Listeners ---
+            
+            lengthSlider.addEventListener('input', (e) => {
+                lengthValue.textContent = e.target.value;
+                generatePassword(); 
+            });
+
+            generateButton.addEventListener('click', generatePassword);
+            copyButton.addEventListener('click', copyToClipboard);
+
+            // Añadir listener a todas las casillas de verificación
+            for (const key in includeOptions) {
+                includeOptions[key].addEventListener('change', generatePassword);
+            }
+
+            // --- Inicialización ---
+            // Generar una contraseña segura al cargar la página
+            generatePassword();
+        });
+    </script>
+</body>
+</html>
