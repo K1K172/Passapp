@@ -17,11 +17,29 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
 
     <style>
-        /* Estilos personalizados para el control deslizante (slider) */
-        /* Tailwind no puede estilizar directamente los pseudo-elementos como el "thumb" del slider */
+        /* Estilos personalizados */
         body {
             font-family: 'Inter', sans-serif;
+            /* image/hexagonos */
+            background-image: url('image/hexagonos');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
         }
+        
+        /* Overlay oscuro para mejorar la legibilidad del texto sobre la imagen de fondo */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(15, 23, 42, 0.85); /* Color slate-900 con 85% de opacidad */
+            z-index: -1;
+        }
+
+        /* Estilos para el control deslizante (slider) */
         input[type="range"] {
             -webkit-appearance: none;
             appearance: none;
@@ -56,10 +74,12 @@
         }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 flex items-center justify-center min-h-screen p-4 antialiased">
+<body class="text-slate-100 flex items-center justify-center min-h-screen p-4 antialiased">
 
     <main class="w-full max-w-md mx-auto">
         <header class="text-center mb-6">
+            <!-- image/logo.jpg -->
+            <img src="image/logo.jpg" alt="Logotipo de la aplicación" class="mx-auto h-16 w-auto mb-4">
             <h1 class="text-3xl md:text-4xl font-bold text-slate-50">Generador de Contraseñas</h1>
             <p class="text-slate-400 mt-2">Crea contraseñas fuertes y seguras en segundos.</p>
         </header>
@@ -81,7 +101,7 @@
         </section>
 
         <!-- Panel de configuración de la contraseña -->
-        <section class="bg-slate-800 rounded-lg p-6 shadow-lg">
+        <section class="bg-slate-800/80 backdrop-blur-sm rounded-lg p-6 shadow-lg">
             <div class="space-y-6">
                 <!-- Control de Longitud -->
                 <div>
